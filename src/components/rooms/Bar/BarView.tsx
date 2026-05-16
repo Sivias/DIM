@@ -1,11 +1,10 @@
 import type { JSX } from 'solid-js';
 import { For, Show, createMemo } from 'solid-js';
 import { unwrap } from 'solid-js/store';
-import { state, addHero, addLog, setHeroPool, spendGold } from '../../../state/store';
+import { state, addHero, addLog, setHeroPool, spendGold, upgradeRoom } from '../../../state/store';
 import { MAX_HEROES_BY_LEVEL, ROOM_DEFS } from '../../../data/roomData';
 import { CLASS_DEFS } from '../../../data/heroData';
 import { doChore } from '../../../systems/LaborSystem';
-import { upgradeRoom } from '../../../state/store';
 import { INN_CHORE_DONE } from '../../../data/eventTemplates';
 import { pick } from '../../../utils/random';
 import LaborSection from '../../shared/LaborSection';

@@ -1,5 +1,5 @@
 import type { JSX } from 'solid-js';
-import { For, createMemo, createSignal } from 'solid-js';
+import { For, createMemo, createSignal, createEffect } from 'solid-js';
 import { state, toggleLogFilter } from '../../state/store';
 import type { LogCategory } from '../../data/types';
 
@@ -44,9 +44,12 @@ export default function EventLog(): JSX.Element {
   });
 
   let logEl: HTMLDivElement | undefined;
-  const scrollToBottom = () => {
+
+  // Scroll to bottom whenever visible entries change
+  createEffect(() => {
+    visibleEntries(); // track dependency
     if (logEl) requestAnimationFrame(() => { if (logEl) logEl.scrollTop = logEl.scrollHeight; });
-  };
+  });
 
   const onDragStart = (idx: number, e: DragEvent) => {
     dragSrc = idx;
@@ -88,15 +91,12 @@ export default function EventLog(): JSX.Element {
       </div>
       <div class="log-entries" ref={logEl}>
         <For each={visibleEntries()}>
-          {(entry) => {
-            scrollToBottom();
-            return (
-              <div class={`log-entry ${entry.isMajor ? 'major' : entry.category}`}>
-                <span class="log-day">D{entry.day}</span>
-                {entry.message}
-              </div>
-            );
-          }}
+          {(entry) => (
+            <div class={`log-entry ${entry.isMajor ? 'major' : entry.category}`}>
+              <span class="log-day">D{entry.day}</span>
+              {entry.message}
+            </div>
+          )}
         </For>
       </div>
     </div>

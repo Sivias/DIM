@@ -29,7 +29,6 @@ export default function LaborBar(): JSX.Element {
 
   const pct    = createMemo(() => state.laborMax > 0 ? state.laborUsed / state.laborMax : 0);
   const phase  = createMemo(() => getSkyPhase(state.laborUsed, state.laborMax));
-  const isMoon = createMemo(() => phase() === 'night');
   const offset = createMemo(() => arcLen * (1 - pct()));
   const pos    = createMemo(() => bodyPos(pct(), W, H));
   const canEnd = createMemo(() => state.laborUsed >= state.laborMax || (state.devMode ?? false));
@@ -72,12 +71,7 @@ export default function LaborBar(): JSX.Element {
 
         <Show
           when={canEnd()}
-          fallback={
-            <div
-              class={`labor-sun-body ${isMoon() ? 'moon' : 'sun'}`}
-              style={bodyStyle()}
-            />
-          }
+          fallback={<div class="labor-sun-body sun" style={bodyStyle()} />}
         >
           <button
             class="labor-sun-body moon labor-end-btn"

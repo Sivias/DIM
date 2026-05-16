@@ -1,9 +1,8 @@
 import type { JSX } from 'solid-js';
 import { For, Show, createSignal, createMemo } from 'solid-js';
-import { state, navigateTo, updateHero, addLog, removeHero, spendGold } from '../../../state/store';
+import { state, navigateTo, updateHero, addLog, removeHero, spendGold, upgradeRoom } from '../../../state/store';
 import { CLASS_DEFS } from '../../../data/heroData';
 import { doChore } from '../../../systems/LaborSystem';
-import { upgradeRoom } from '../../../state/store';
 import { MAX_HEROES_BY_LEVEL, ROOM_DEFS } from '../../../data/roomData';
 import StatBlock from '../../shared/StatBlock';
 import { ABILITY_DEFS } from '../../../data/abilityData';
@@ -19,9 +18,6 @@ export default function GuestRoomsView(): JSX.Element {
     ROOM_DEFS.guestRooms.upgrades.find((u) => u.level === state.roomLevels.guestRooms + 1),
   );
 
-  const tidyRooms = () => {
-    doChore('rooms_tidy', 1, 10, 'Rooms tidied — guests will pay a little extra tonight.');
-  };
 
   const tryUpgrade = () => {
     const up = nextUpgrade();

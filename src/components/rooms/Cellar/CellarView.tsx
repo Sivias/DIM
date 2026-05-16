@@ -1,10 +1,9 @@
 import type { JSX } from 'solid-js';
 import { For, Show, createSignal, createMemo } from 'solid-js';
-import { state, navigateTo, addLog, addCellarItem, removeCellarItem, spendGold } from '../../../state/store';
+import { state, addLog, addCellarItem, removeCellarItem, spendGold, upgradeRoom } from '../../../state/store';
 import { POTION_RECIPES } from '../../../data/itemData';
 import { makeItem } from '../../../systems/ItemSystem';
 import { doChore } from '../../../systems/LaborSystem';
-import { upgradeRoom } from '../../../state/store';
 import { CELLAR_CAPACITY_BY_LEVEL, ROOM_DEFS } from '../../../data/roomData';
 import { INN_CHORE_DONE } from '../../../data/eventTemplates';
 import { pick } from '../../../utils/random';

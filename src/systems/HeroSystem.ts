@@ -1,7 +1,7 @@
 import type { Hero, HeroClass, BaseStats, Equipment } from '../data/types';
 import { CLASS_DEFS, randomHeroName, ALL_HERO_CLASSES } from '../data/heroData';
 import { ABILITY_DEFS } from '../data/abilityData';
-import { uid, randInt, pick, pickN, chance } from '../utils/random';
+import { uid, randInt, pick, chance } from '../utils/random';
 import { clamp } from '../utils/dice';
 import { ITEM_TEMPLATES } from '../data/itemData';
 import { makeItem } from './ItemSystem';
@@ -85,24 +85,22 @@ export function generateHero(heroClass?: HeroClass, stableLevel = 1): Hero {
 
 /** Generate a pool of heroes for the bar */
 export function generateHeroPool(poolSize: number, stableLevel: number): Hero[] {
-  // Weighted class distribution – more common classes appear more often
   const weights = ALL_HERO_CLASSES.map((cls) => ({
-    item: cls,
+    cls,
     weight: cls === 'knight' || cls === 'cleric' ? 2 : 1,
   }));
-  const classes = pickN(
-    ALL_HERO_CLASSES, poolSize
-  ).map(() => {
-    const total = weights.reduce((a, b) => a + b.weight, 0);
-    let r = Math.random() * total;
-    for (const { item, weight } of weights) {
-      r -= weight;
-      if (r <= 0) return item;
-    }
-    return 'knight' as HeroClass;
-  });
+  const total = weights.reduce((a, b) => a + b.weight, 0);
 
-  return classes.map((cls) => generateHero(cls, stableLevel));
+  const pickWeighted = (): HeroClass => {
+    let r = Math.random() * total;
+    for (const { cls, weight } of weights) {
+      r -= weight;
+      if (r <= 0) return cls;
+    }
+    return 'knight';
+  };
+
+  return Array.from({ length: poolSize }, () => generateHero(pickWeighted(), stableLevel));
 }
 
 const XP_CURVE = [0, 100, 250, 500, 900, 1500, 2400, 3800];
@@ -166,4 +164,6 @@ export function getArmorValue(hero: Hero): number {
 export function getWeaponDamage(hero: Hero): number {
   return (hero.equipment.weapon?.effect.damageBonus ?? 0);
 }
+
+
 

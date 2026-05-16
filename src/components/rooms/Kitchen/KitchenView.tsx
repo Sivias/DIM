@@ -1,9 +1,8 @@
 import type { JSX } from 'solid-js';
 import { For, Show, createSignal } from 'solid-js';
 import { Portal } from 'solid-js/web';
-import { state, addLog, spendGold } from '../../../state/store';
+import { state, addLog, spendGold, upgradeRoom } from '../../../state/store';
 import { doChore } from '../../../systems/LaborSystem';
-import { upgradeRoom } from '../../../state/store';
 import { ROOM_DEFS } from '../../../data/roomData';
 import { INN_CHORE_DONE } from '../../../data/eventTemplates';
 import { pick } from '../../../utils/random';
@@ -144,7 +143,7 @@ export default function KitchenView(): JSX.Element {
     if (ok) {
       setGameItems((prev) => prev.filter((i) => i.id !== itemId));
       setSorted((n) => n + 1);
-      showFeedback(`✓ ${item.name.split('_')[0]} sorted!`, true);
+      showFeedback(`✓ ${item.name} sorted!`, true);
     } else {
       showFeedback(`✗ ${item.name} → ${item.category}`, false);
     }
@@ -159,7 +158,6 @@ export default function KitchenView(): JSX.Element {
 
   // ── Chore completions ────────────────────────────────────────────────────
   const completeSort = () => {
-    if (state.laborUsed >= state.laborMax) { addLog('No labor remaining — rest first.', 'kitchen'); return; }
     doChore('kitchen_sort', 1, 15, pick(INN_CHORE_DONE.kitchen_sort));
     setGameItems(randomItems());
     setSorted(0);
@@ -252,7 +250,7 @@ export default function KitchenView(): JSX.Element {
                       style={{ cursor: 'grab', 'user-select': 'none' }}
                     >
                       <span>{item.icon}</span>
-                      <span>{item.name.replace(/_\d+$/, '')}</span>
+                      <span>{item.name}</span>
                     </div>
                   )}
                 </For>
@@ -366,7 +364,7 @@ export default function KitchenView(): JSX.Element {
         <Show when={ghostPos() && draggedItem()}>
           <Portal>
             <div class="drag-ghost" style={{ left: `${ghostPos()!.x}px`, top: `${ghostPos()!.y}px` }}>
-              {draggedItem()!.icon}&nbsp;{draggedItem()!.name.replace(/_\d+$/, '')}
+              {draggedItem()!.icon}&nbsp;{draggedItem()!.name}
             </div>
           </Portal>
         </Show>

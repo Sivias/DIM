@@ -1,8 +1,7 @@
 import type { JSX } from 'solid-js';
 import { Show } from 'solid-js';
-import { state, navigateTo, addLog, spendGold } from '../../../state/store';
+import { state, addLog, spendGold, upgradeRoom } from '../../../state/store';
 import { doChore } from '../../../systems/LaborSystem';
-import { upgradeRoom } from '../../../state/store';
 import { ROOM_DEFS } from '../../../data/roomData';
 import { INN_CHORE_DONE } from '../../../data/eventTemplates';
 import { pick } from '../../../utils/random';

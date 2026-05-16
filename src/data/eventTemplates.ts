@@ -84,10 +84,14 @@ export const INN_CHORE_DONE: Record<string, string[]> = {
     'Dust, sawdust, and suspicious unidentified debris are swept into a corner.',
     'The floor boards protest as the broom passes over them, but they look better for it.',
   ],
+  kitchen_unload: [
+    'Crates and sacks are hauled in from the yard, stacked neatly by the hearth.',
+    'The delivery is in. The kitchen smells of earth and fresh produce.',
+  ],
   kitchen_cook: [
     'The pot bubbles steadily. The inn fills with the smell of a proper meal.',
     'Three hearty dishes prepared. Heroes will eat well tonight.',
-    'Bread baked, stew simmered, broth seasoned. A good day\'s cooking.',
+    "Bread baked, stew simmered, broth seasoned. A good day's cooking.",
   ],
   kitchen_sort: [
     'Turnips and mushrooms are sorted into their proper crates — the kitchen feels almost civilised.',
@@ -100,6 +104,10 @@ export const INN_CHORE_DONE: Record<string, string[]> = {
   stable_feed: [
     'Each horse buries its nose in the feed trough with enthusiasm.',
     'Water refilled, feed distributed. The animals are content.',
+  ],
+  stable_groom: [
+    'Coat brushed to a gleam, mane untangled — the horses look almost noble.',
+    'Each horse is brushed and fussed over. They seem pleased with the attention.',
   ],
   cellar_brew: [
     'The potion quietly simmers, then settles into a rich {ITEM} with a satisfying pop of the cork.',

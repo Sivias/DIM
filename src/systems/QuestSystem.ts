@@ -123,7 +123,7 @@ function completeParty(partyId: string): void {
   const totalGold = party.goldFound + party.quest.goldReward;
   addGold(totalGold);
 
-  // XP distribution
+  // XP distribution and status reset
   party.heroIds.forEach((hid) => {
     const hero = state.heroes.find((h) => h.id === hid);
     if (!hero) return;
@@ -135,13 +135,6 @@ function completeParty(partyId: string): void {
     }
   });
 
-  // Transfer party loot to inn inventory
-  party.inventory.forEach((item) => {
-    // For now, add potion/ingredient to cellar; others could be equipped
-    if (item.type === 'ingredient' || item.type === 'potion') {
-      // addCellarItem(item); // handle in component
-    }
-  });
 
   addPartyLog(partyId, flavorText(QUEST_COMPLETE, { HERO: party.heroIds.length ? 'the party' : 'them' }));
   addLog(`✅ "${party.quest.name}" completed! +${totalGold} gold.`, 'hearth', true);
