@@ -663,6 +663,3 @@ export default function ThreeScene(props: ThreeSceneProps): JSX.Element {
     />
   );
 }
-
-
-
