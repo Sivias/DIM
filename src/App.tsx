@@ -1,6 +1,7 @@
 import type { JSX } from 'solid-js';
 import { Show, For, createMemo, createSignal } from 'solid-js';
 import { state, navigateTo } from './state/store';
+import { cookHeat, cookPhase } from './state/cookState';
 
 import LaborBar    from './components/inn/LaborBar';
 import EventLog    from './components/inn/EventLog';
@@ -29,16 +30,23 @@ export default function App(): JSX.Element {
   const [logOpen, setLogOpen] = createSignal(true);
   const [logHeight, setLogHeight] = createSignal(120);
   const [isResizing, setIsResizing] = createSignal(false);
+  let dragMoved = false;
 
   // Shared resize logic — works for both mouse and touch
   const startResize = (startY: number) => {
-    if (!logOpen()) return;
+    dragMoved = false;
     setIsResizing(true);
-    const startH = logHeight();
+    const startOpen = logOpen();
+    const startH    = startOpen ? logHeight() : LOG_MIN_H;
 
     const onMove = (clientY: number) => {
-      const h = Math.max(LOG_MIN_H, Math.min(LOG_MAX_H, startH + (startY - clientY)));
-      setLogHeight(h);
+      const delta = startY - clientY; // positive = dragged upward
+      if (Math.abs(delta) > 4) dragMoved = true;
+      // Dragging up from collapsed state opens the log
+      if (!startOpen && delta > 8) setLogOpen(true);
+      if (logOpen()) {
+        setLogHeight(Math.max(LOG_MIN_H, Math.min(LOG_MAX_H, startH + delta)));
+      }
     };
     const onMouseMove = (ev: MouseEvent) => onMove(ev.clientY);
     const onTouchMove = (ev: TouchEvent) => { ev.preventDefault(); onMove(ev.touches[0].clientY); };
@@ -58,8 +66,19 @@ export default function App(): JSX.Element {
   const onResizeMouseDown = (e: MouseEvent) => { e.preventDefault(); startResize(e.clientY); };
   const onResizeTouchStart = (e: TouchEvent) => { e.preventDefault(); startResize(e.touches[0].clientY); };
 
+  const cookOverlayClass = createMemo(() => {
+    if (state.activeScreen === 'kitchen') return '';
+    if (state.completedChores.includes('kitchen_cook')) return '';
+    if (cookPhase() === 'burned') return 'cook-warn-overlay burning';
+    if (cookHeat() >= 80 && cookPhase() !== 'idle') return 'cook-warn-overlay warning';
+    return '';
+  });
+
   return (
     <div class="game-container">
+      <Show when={cookOverlayClass() !== ''}>
+        <div class={cookOverlayClass()} aria-hidden="true" />
+      </Show>
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <header class="game-header">
         {/* Row 1: identity + stats */}
@@ -103,23 +122,24 @@ export default function App(): JSX.Element {
             transition: isResizing() ? 'none' : undefined,
           }}
         >
-          {/* Drag-to-resize handle */}
-          <div class="log-resize-handle" onMouseDown={onResizeMouseDown} onTouchStart={onResizeTouchStart} />
+          {/* Drag-to-resize + collapse tab */}
+          <div
+            class="log-resize-handle"
+            onMouseDown={onResizeMouseDown}
+            onTouchStart={onResizeTouchStart}
+            onClick={() => { if (!dragMoved) { const opening = !logOpen(); if (opening) setLogHeight(LOG_DEFAULT_H); setLogOpen(opening); } }}
+            title={logOpen() ? 'Collapse log' : 'Expand log'}
+          >
+            <span class="log-collapse-chevron">{logOpen() ? '▾' : '▴'}</span>
+          </div>
 
-          {/* Settings + minimize buttons — top-right corner of log */}
+          {/* Settings button — top-right corner of log */}
           <div class="log-corner-btns">
             <button
               class="log-minimize-btn"
               onClick={() => navigateTo('settings')}
               title="Settings"
             >⚙️</button>
-            <button
-              class="log-minimize-btn"
-              onClick={() => { const opening = !logOpen(); if (opening) setLogHeight(LOG_DEFAULT_H); setLogOpen(opening); }}
-              title={logOpen() ? 'Minimise log' : 'Restore log'}
-            >
-              {logOpen() ? '▾' : '▴'}
-            </button>
           </div>
 
           <EventLog />

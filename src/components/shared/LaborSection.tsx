@@ -7,7 +7,8 @@ export interface LaborTask {
   icon:     string;
   name:     string;
   desc:     string;
-  bonus:    string;     // e.g. "+10g"
+  bonus:    string;
+  verb?:    string;   // button label — defaults to 'Work'
   action:   () => void;
   /** Extra condition beyond labor remaining & not already done */
   canAct?:  () => boolean;
@@ -22,7 +23,7 @@ export default function LaborSection(props: Props): JSX.Element {
 
   return (
     <div class="labor-section">
-      <div class="labor-section-title">⚒ Today's Labor</div>
+      <div class="labor-section-title">⚒ Today's Chores</div>
       <div class="labor-task-list">
         <For each={props.tasks}>
           {(task) => {
@@ -50,7 +51,7 @@ export default function LaborSection(props: Props): JSX.Element {
                     disabled={!ready()}
                     title={hint()}
                     onClick={task.action}
-                  >Do</button>
+                  >{task.verb ?? 'Work'}</button>
                 </Show>
               </div>
             );

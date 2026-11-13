@@ -12,21 +12,16 @@ const TABS: Array<{ id: RoomId; icon: string; label: string }> = [
   { id: 'stable',     icon: '🐴', label: 'Stable'  },
 ];
 
-const ROOM_SCREENS = new Set<string>(['hearth','bar','guestRooms','kitchen','cellar','stable']);
+const ROOM_SCREENS = new Set<string>(['hearth','bar','guestRooms','kitchen','cellar','stable','adventure']);
 
 export default function RoomTabs(): JSX.Element {
   return (
     <Show when={ROOM_SCREENS.has(state.activeScreen)}>
       <nav class="room-tabs" role="tablist">
-        {/* Inn — always first, never "active" like a room tab */}
-        <button
-          class="room-tab room-tab-inn"
-          onClick={() => navigateTo('inn')}
-          title="Return to the Inn"
-        >
-          <span class="room-tab-icon">🏰</span>
-          <span class="room-tab-label">Inn</span>
-        </button>
+        {/* Inn — decorative hanging sign, not a navigation tab */}
+        <span class="room-tab-inn-sign" title="Dunge-Inn">
+          🏰
+        </span>
 
         <For each={TABS}>
           {(tab) => (

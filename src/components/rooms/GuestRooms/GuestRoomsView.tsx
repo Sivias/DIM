@@ -1,6 +1,6 @@
 import type { JSX } from 'solid-js';
 import { For, Show, createSignal, createMemo } from 'solid-js';
-import { state, navigateTo, updateHero, addLog, removeHero, spendGold, upgradeRoom } from '../../../state/store';
+import { state, updateHero, addLog, removeHero, spendGold, upgradeRoom } from '../../../state/store';
 import { CLASS_DEFS } from '../../../data/heroData';
 import { doChore } from '../../../systems/LaborSystem';
 import { MAX_HEROES_BY_LEVEL, ROOM_DEFS } from '../../../data/roomData';
@@ -47,6 +47,7 @@ export default function GuestRoomsView(): JSX.Element {
           name: 'Tidy the Rooms',
           desc: 'Fresh linens and swept floors — guests pay a little extra.',
           bonus: '+10g',
+          verb: 'Tidy',
           action: () => doChore('rooms_tidy', 1, 10, 'Rooms tidied — guests will pay a little extra tonight.'),
         }]} />
 

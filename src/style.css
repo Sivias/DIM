@@ -67,6 +67,29 @@ button { touch-action: manipulation; }
   overflow: hidden;
 }
 
+/* ── Cook warning overlay (visible from other screens) ── */
+.cook-warn-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8000;
+  border-radius: 0;
+}
+.cook-warn-overlay.warning {
+  animation: cook-warn-pulse 2.5s ease-in-out infinite;
+}
+.cook-warn-overlay.burning {
+  animation: cook-burn-pulse 0.9s ease-in-out infinite;
+}
+@keyframes cook-warn-pulse {
+  0%, 100% { box-shadow: inset 0 0 60px rgba(230,180,0,.15); }
+  50%       { box-shadow: inset 0 0 90px rgba(230,180,0,.35); }
+}
+@keyframes cook-burn-pulse {
+  0%, 100% { box-shadow: inset 0 0 80px rgba(220,40,0,.25); }
+  50%       { box-shadow: inset 0 0 120px rgba(220,40,0,.55); }
+}
+
 /* ─── Header ─────────────────────────────────────────────────────────────── */
 .game-header {
   display: flex;
@@ -150,7 +173,7 @@ button { touch-action: manipulation; }
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--tr);
-  padding-bottom: 160px; /* clear the floating log panel */
+  padding-bottom: 48px; /* nudge scrollbar into view near the log */
 }
 .screen.active { opacity: 1; pointer-events: all; }
 
@@ -221,39 +244,41 @@ button { touch-action: manipulation; }
   color: var(--amber);
 }
 
-/* Drag-to-resize handle */
+/* Drag-to-resize + collapse tab */
 .log-resize-handle {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 5px;
+  position: relative;
+  height: 20px;
   cursor: ns-resize;
   z-index: 10;
   flex-shrink: 0;
-  touch-action: none; /* prevent scroll hijack during resize drag */
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,.03);
+  border-bottom: 1px solid var(--border);
+  transition: background var(--tr);
 }
-/* Larger invisible touch target via pseudo-element */
+.log-resize-handle:hover {
+  background: rgba(232,168,62,.08);
+}
+/* Larger invisible touch target */
 .log-resize-handle::before {
   content: '';
   position: absolute;
-  top: -8px; left: 0; right: 0;
-  height: 22px; /* generous tap target */
+  top: -4px; left: 0; right: 0;
+  height: 28px;
 }
-.log-resize-handle::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 36px;
-  height: 2px;
-  border-radius: 1px;
-  background: var(--stone2);
-  transition: background var(--tr);
+.log-collapse-chevron {
+  font-size: .78rem;
+  color: var(--stone3);
+  line-height: 1;
+  pointer-events: none;
+  transition: color var(--tr);
 }
-.log-resize-handle:hover::after { background: var(--amber-dim); }
+.log-resize-handle:hover .log-collapse-chevron { color: var(--amber); }
 @media (hover: none) {
-  /* Always show a slightly brighter pill on touch devices */
-  .log-resize-handle::after { background: var(--stone2); width: 48px; height: 3px; border-radius: 2px; }
+  .log-resize-handle { height: 24px; }
 }
 
 /* Venetian slat overlay */
@@ -476,24 +501,26 @@ button.labor-end-btn:hover {
 }
 
 /* Inn tab — navigation tab, visually separated from room tabs */
-.room-tab-inn {
-  color: var(--parchment2);
-  margin-right: 4px;
-  border-right-color: var(--stone2);
+.room-tab-inn-sign {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(.9rem, 2.2vw, 1.15rem);
+  padding: 0 8px 0 4px;
+  margin-right: 2px;
+  opacity: 0.6;
   position: relative;
+  pointer-events: none;
+  user-select: none;
 }
-.room-tab-inn::after {
+.room-tab-inn-sign::after {
   content: '';
   position: absolute;
-  right: -6px;
+  right: -2px;
   top: 20%;
   height: 60%;
   width: 1px;
   background: var(--stone2);
-}
-.room-tab-inn:hover {
-  color: var(--amber-glow) !important;
-  border-color: var(--amber-dim) !important;
 }
 
 .room-tab-icon  { font-size: clamp(.85rem, 2vw, 1.05rem); line-height: 1; }
@@ -1037,24 +1064,288 @@ button.labor-end-btn:hover {
 .ingredient-chip.selected { background:rgba(61,122,110,.35); border-color:var(--teal-light); }
 .ingredient-chip:hover { border-color:var(--teal-light); }
 
-/* ── Cooking minigame ── */
-.cook-recipe-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 10px 12px;
-  margin-bottom: 10px;
+/* ── Cooking minigame header ── */
+.cook-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
-.cook-recipe-header {
+.cook-header-right {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
 }
-.cook-recipe-icon { font-size: 1.4rem; line-height: 1; }
-.cook-recipe-name { font-family: var(--font-h); font-size: .82rem; color: var(--amber); }
-.cook-recipe-needs { display: flex; gap: 4px; flex-wrap: wrap; }
-.cook-ingredient-btns { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+.cook-meal-count { font-variant-numeric: tabular-nums; }
+
+/* Fixed-height feedback area — no layout shift */
+.cook-feedback-area {
+  min-height: 30px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+}
+.cook-feedback-area .kitchen-feedback,
+.cook-feedback-area .cook-prompt,
+.cook-feedback-area .cook-burned-msg { margin: 0; }
+.cook-heat-wrap { margin: 10px 0 6px; }
+.cook-heat-bar {
+  position: relative;
+  height: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: linear-gradient(to right,
+    #1e7a1e 0%,
+    #6a9e1e 45%,
+    #c8a020 60%,
+    #c86020 80%,
+    #c01818 100%
+  );
+}
+.cook-heat-cover {
+  position: absolute;
+  right: 0; top: 0;
+  height: 100%;
+  background: var(--bg, #0f0b06);
+  transition: width 0.15s linear;
+  border-radius: 0 10px 10px 0;
+}
+.cook-heat-marker {
+  position: absolute;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: rgba(255,255,255,.55);
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
+  transition: background .2s;
+}
+.cook-heat-marker.satisfied { background: var(--green-light); }
+.cook-heat-line {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
+}
+.cook-heat-line.complete-line { background: rgba(255,255,100,.75); }
+.cook-heat-line.burn-line     { background: rgba(255,80,40,.85); }
+.cook-heat-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: .68rem;
+  color: var(--stone3);
+  margin-top: 3px;
+}
+.cook-legend-ready { color: #c8c820; }
+.cook-legend-burn  { color: #c06020; }
+.cook-prompt {
+  font-family: var(--font-h);
+  font-size: .82rem;
+  color: var(--amber);
+  margin: 8px 0 6px;
+  animation: fadeIn .2s ease;
+}
+.cook-burned-msg {
+  font-family: var(--font-h);
+  font-size: .82rem;
+  color: var(--red-light);
+  margin: 8px 0 4px;
+  animation: fadeIn .2s ease;
+}
+.cook-dispose-btn {
+  background: rgba(140,30,30,.3);
+  border-color: var(--red-light);
+  color: var(--red-light);
+  margin-top: 4px;
+}
+
+/* ── Stovetop drag view ── */
+.stove-view-wrap { margin: 8px 0; }
+.stove-surface {
+  background: #191512;
+  border: 2px solid #0e0c0a;
+  border-radius: 3px;
+  padding: 14px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.stove-layout {
+  display: grid;
+  grid-template-areas:
+    ".    top  ."
+    "left pan  right"
+    ".    bot  .";
+  grid-template-columns: 50px 84px 50px;
+  grid-template-rows:    50px 84px 50px;
+  gap: 8px;
+  align-items: center;
+  justify-items: center;
+}
+.stove-slot-top   { grid-area: top; }
+.stove-slot-right { grid-area: right; }
+.stove-slot-bot   { grid-area: bot; }
+.stove-slot-left  { grid-area: left; }
+.stove-burner {
+  grid-area: pan;
+  position: relative;
+  width: 84px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: box-shadow 0.3s;
+}
+.stove-burner-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid #383030;
+  pointer-events: none;
+  transition: border-color 0.35s;
+}
+.stove-burner-ring.outer { width: 82px; height: 82px; }
+.stove-burner-ring.inner { width: 54px; height: 54px; }
+.stove-pan {
+  width: 60px;
+  height: 60px;
+  background: #1e1c1a;
+  border-radius: 50%;
+  border: 3px solid #2e2a26;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  pointer-events: none;
+}
+.stove-pan.pan-awaiting {
+  border-color: var(--amber-dim);
+  animation: pan-pulse 1.1s ease-in-out infinite;
+}
+@keyframes pan-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(232,168,62,.35); }
+  50%       { box-shadow: 0 0 20px rgba(232,168,62,.7); }
+}
+.stove-pan.pan-hovered {
+  border-color: var(--green-light) !important;
+  box-shadow: 0 0 16px rgba(80,200,80,.55) !important;
+  animation: none;
+}
+.stove-pan.pan-burned {
+  border-color: #c01818;
+  box-shadow: 0 0 14px rgba(200,20,20,.5);
+  animation: none;
+}
+.stove-pan-contents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+.stove-pan-ing { font-size: 1.1rem; line-height: 1; pointer-events: none; }
+.stove-ing-slot {
+  width: 50px;
+  height: 50px;
+  background: rgba(255,255,255,.03);
+  border: 2px solid var(--border);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: default;
+  transition: all 0.15s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* slot states */
+.stove-ing-slot.slot-empty   { opacity: 0.18; }
+.stove-ing-slot.slot-pending { opacity: 0.38; filter: grayscale(0.4); }
+.stove-ing-slot.slot-added   { opacity: 1; border-color: var(--green); background: rgba(60,120,60,.14); }
+.stove-ing-slot.slot-next    { opacity: 1; border-color: var(--amber); }
+
+/* ── Cook ingredient source row ── */
+.cook-ing-source-row {
+  display: flex;
+  gap: 6px;
+  margin: 6px 0 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.cook-ing-actions { margin-left: auto; }
+.cook-ing-source {
+  width: 52px;
+  height: 52px;
+  background: rgba(255,255,255,.04);
+  border: 2px solid var(--border);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: default;
+  transition: all 0.15s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.cook-ing-source.available {
+  border-color: var(--stone3);
+  background: rgba(255,255,255,.08);
+  cursor: grab;
+}
+.cook-ing-source.available:hover {
+  border-color: var(--amber-dim);
+  background: rgba(232,168,62,.1);
+  transform: scale(1.05);
+}
+.cook-ing-source.available:active { cursor: grabbing; }
+.cook-ing-source.dragging { opacity: 0.25; transform: scale(0.88); }
+.cook-ing-source.ing-next {
+  border-color: var(--amber) !important;
+  background: rgba(232,168,62,.15) !important;
+  box-shadow: 0 0 10px rgba(232,168,62,.35);
+}
+
+/* ── Recipe step progress ── */
+.cook-recipe-steps { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+.cook-step {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: .76rem;
+  color: var(--parchment2);
+  opacity: 0.55;
+  transition: all .2s;
+}
+.cook-step.done {
+  opacity: 0.35;
+  border-color: var(--green);
+  background: rgba(60,120,60,.1);
+  text-decoration: line-through;
+}
+.cook-step.current {
+  opacity: 1;
+  border-color: var(--amber);
+  color: var(--amber);
+  background: rgba(232,168,62,.1);
+}
+.cook-step-num { font-size: .62rem; color: var(--stone3); font-family: var(--font-h); margin-right: 1px; }
+.stove-ing-icon  { font-size: 1.25rem; line-height: 1; }
+.stove-ing-label { font-size: .58rem; color: var(--parchment2); font-family: var(--font-h); letter-spacing: .02em; }
 /* ─── Uniform Labor Section ───────────────────────────────────────────────── */
 .labor-section {
   background: rgba(232,168,62,.04);
@@ -1102,6 +1393,9 @@ button.labor-end-btn:hover {
 .task-bonus { font-size: .68rem; color: var(--teal-light); font-family: var(--font-b); }
 .task-desc { font-size: .72rem; color: var(--parchment2); margin-top: 1px; }
 
+/* Fixed-width so all verb buttons align regardless of label length */
+.task-row .btn { min-width: 58px; text-align: center; flex-shrink: 0; }
+
 .task-done-badge {
   font-family: var(--font-h);
   font-size: .68rem;
@@ -1118,25 +1412,111 @@ button.labor-end-btn:hover {
 .stable-tasks { display: flex; flex-direction: column; gap: 6px; }
 
 /* ─── Adventure ───────────────────────────────────────────────────────────── */
+
+/* Outer wrapper — re-uses room-view; kept for legacy selectors */
 .adventure-view { height:100%; display:flex; flex-direction:column; background:var(--bg); min-height:0; }
-.adventure-scene { flex:1; position:relative; overflow:hidden; min-height:180px; }
-.adventure-canvas { width:100%; height:100%; display:block; }
-.adventure-portraits {
-  display:flex; gap:6px;
-  padding:8px var(--pad);
-  background:var(--panel-bg);
-  border-top:1px solid var(--border);
-  overflow-x:auto; flex-shrink:0;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
+
+/* Scrollable content column, children centred up to 960 px */
+.adventure-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 160px; /* clear floating log panel */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-.adventure-portraits::-webkit-scrollbar { display:none; }
+
+/* Scene canvas wrapper — full width up to max, relative for overlays */
+.adventure-scene-wrap {
+  width: 100%;
+  max-width: 960px;
+  position: relative;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+.adventure-scene-wrap canvas { display: block; width: 100% !important; }
+
+/* Env label floating over the top-left of the canvas */
+.adventure-env-label {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  font-family: var(--font-h);
+  font-size: .75rem;
+  color: rgba(255,255,255,.55);
+  pointer-events: none;
+  text-shadow: 0 1px 4px rgba(0,0,0,.9);
+  letter-spacing: .03em;
+}
+
+/* Info bar below the scene: portraits + initiative + actions */
+.adventure-info-bar {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  gap: var(--gap);
+  padding: 8px var(--pad);
+  background: var(--panel-bg);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Portrait strip inside the info bar — centred, wraps */
+.adventure-portraits {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
 .portrait-card { display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 8px; background:rgba(255,255,255,.03); border:1px solid var(--stone2); border-radius:5px; min-width:clamp(76px,14vw,92px); position:relative; flex-shrink:0; }
 .portrait-icon { font-size:clamp(1.4rem,3.5vw,1.8rem); width:clamp(38px,7vw,44px); height:clamp(38px,7vw,44px); display:flex; align-items:center; justify-content:center; border-radius:4px; background:rgba(0,0,0,.4); border:1px solid rgba(255,255,255,.08); }
 .portrait-name { font-family:var(--font-h); font-size:0.62rem; color:var(--parchment2); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:68px; }
 .portrait-ability-btn { padding:2px 4px; border-radius:3px; border:1px solid var(--teal); background:rgba(61,122,110,.2); color:var(--teal-light); font-size:0.64rem; cursor:pointer; transition:all .15s; -webkit-tap-highlight-color:transparent; }
 .portrait-ability-btn:hover { background:var(--teal); color:#fff; }
 .portrait-ability-btn:disabled { opacity:.3; cursor:not-allowed; }
+
+/* Inline initiative panel */
+.adventure-initiative {
+  background: rgba(10,8,4,.9);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  flex-shrink: 0;
+  min-width: clamp(140px, 22vw, 180px);
+  max-height: 200px;
+  overflow-y: auto;
+  align-self: flex-start;
+}
+
+/* Actions column (Recall / Descend) */
+.adventure-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  justify-content: center;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+/* Recent event log strip */
+.adventure-log-strip {
+  width: 100%;
+  max-width: 960px;
+  max-height: 90px;
+  overflow-y: auto;
+  padding: 6px var(--pad);
+  background: rgba(0,0,0,.45);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
 
 /* Choice overlay */
 .choice-overlay { position:absolute; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:center; justify-content:center; z-index:10; padding:12px; }

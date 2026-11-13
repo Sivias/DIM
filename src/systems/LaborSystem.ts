@@ -1,6 +1,7 @@
 import {
   state,
   useLabor,
+  addGold,
   addBonusIncome,
   addLog,
   advanceDay,
@@ -17,7 +18,10 @@ export function doChore(choreKey: string, laborCost: number, bonusGold: number, 
     return false;
   }
   if (laborCost > 0 && !useLabor(laborCost)) return false;
-  if (bonusGold > 0) addBonusIncome(bonusGold);
+  if (bonusGold > 0) {
+    addGold(bonusGold);          // immediate
+    addBonusIncome(bonusGold);   // track for day-end summary
+  }
   if (message) addLog(message, state.activeScreen as Parameters<typeof addLog>[1]);
   markChoreComplete(choreKey);
   return true;
