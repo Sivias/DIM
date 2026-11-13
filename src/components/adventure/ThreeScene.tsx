@@ -355,12 +355,11 @@ export default function ThreeScene(props: ThreeSceneProps): JSX.Element {
     const cs = props.party?.combatState;
     if (!cs) return;
     for (const c of cs.combatants) {
-      const bar = hpBars.get(c.id);
-      if (!bar) continue;
       const newBar = makeHpBarSprite(c.hp, c.maxHp, c.type === 'enemy');
+      const oldMat = bar.material as THREE.SpriteMaterial;
       bar.material = newBar.material;
-      newBar.material.dispose(); // newBar itself not added to scene
-    }
+      oldMat.map?.dispose();
+      oldMat.dispose();
     // Hero HP from state
     for (const hero of state.heroes) {
       const bar = hpBars.get(hero.id);
