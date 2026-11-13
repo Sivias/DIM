@@ -4,6 +4,7 @@ import type { GameState, Hero, Party, Item, LogEntry, LogCategory, ActiveScreen,
 import { makeDefaultState } from './defaultState';
 import { loadState, saveState } from './persistence';
 import { uid } from '../utils/random';
+import { resetCookState } from './cookState';
 
 // ─── Store Creation ───────────────────────────────────────────────────────────
 const initial = loadState() ?? makeDefaultState();
@@ -83,11 +84,10 @@ export function isChoreComplete(key: string): boolean {
 
 // ─── Day Cycle ───────────────────────────────────────────────────────────────
 export function advanceDay(): void {
-  // Calculate income
-  const rent = state.heroes.length * 8;
-  const bonus = state.dailyBonusIncome;
+  const rent    = state.heroes.length * 8;
+  const bonus   = state.dailyBonusIncome; // already paid out; kept for log display only
   const expense = 10;
-  const netGold = rent + bonus - expense;
+  const netGold = rent - expense;         // bonus was added immediately when earned
 
   setState(
     produce((s) => {
@@ -99,8 +99,10 @@ export function advanceDay(): void {
     }),
   );
 
+  resetCookState();
+
   addLog(
-    `Day ${state.day - 1} ends. Rent: ${rent}g | Chores bonus: ${bonus}g | Expenses: ${expense}g | Net: ${netGold > 0 ? '+' : ''}${netGold}g`,
+    `Day ${state.day - 1} ends. Rent: ${rent}g | Chores bonus: ${bonus}g | Expenses: ${expense}g | Net: ${netGold + bonus > 0 ? '+' : ''}${netGold + bonus}g`,
     'inn',
     true,
   );

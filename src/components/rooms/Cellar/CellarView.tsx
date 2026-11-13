@@ -74,6 +74,7 @@ export default function CellarView(): JSX.Element {
           name: 'Brew a Potion',
           desc: 'Select two ingredients below, then brew. Quest returns provide ingredients.',
           bonus: '+potion',
+          verb: 'Brew',
           canAct: () => sel1() !== null && sel2() !== null && potions().length < capacity(),
           hint: sel1() && sel2() ? 'Cellar is full.' : 'Select two ingredients below first.',
           action: brew,

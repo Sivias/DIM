@@ -9,9 +9,9 @@ import LaborSection from '../../shared/LaborSection';
 import type { LaborTask } from '../../shared/LaborSection';
 
 const STABLE_TASKS: LaborTask[] = [
-  { key: 'stable_hay',   icon: '🌾', name: 'Shovel Hay',      desc: 'Clear old hay and spread fresh bales.',       bonus: '+6g', action: () => doChore('stable_hay',   1, 6, pick(INN_CHORE_DONE.stable_hay   ?? ['Hay shovelled.'])) },
-  { key: 'stable_feed',  icon: '🪣', name: 'Fill the Trough',  desc: 'Water and oats for every horse.',             bonus: '+5g', action: () => doChore('stable_feed',  1, 5, pick(INN_CHORE_DONE.stable_feed  ?? ['Trough filled.'])) },
-  { key: 'stable_groom', icon: '🐴', name: 'Groom the Horses', desc: 'Brush each horse until their coat gleams.',  bonus: '+7g', action: () => doChore('stable_groom', 1, 7, pick(INN_CHORE_DONE.stable_groom ?? ['Horses groomed.'])) },
+  { key: 'stable_hay',   icon: '🌾', name: 'Shovel Hay',      desc: 'Clear old hay and spread fresh bales.',       bonus: '+6g', verb: 'Shovel', action: () => doChore('stable_hay',   1, 6, pick(INN_CHORE_DONE.stable_hay   ?? ['Hay shovelled.'])) },
+  { key: 'stable_feed',  icon: '🪣', name: 'Fill the Trough',  desc: 'Water and oats for every horse.',             bonus: '+5g', verb: 'Fill',   action: () => doChore('stable_feed',  1, 5, pick(INN_CHORE_DONE.stable_feed  ?? ['Trough filled.'])) },
+  { key: 'stable_groom', icon: '🐴', name: 'Groom the Horses', desc: 'Brush each horse until their coat gleams.',  bonus: '+7g', verb: 'Groom',  action: () => doChore('stable_groom', 1, 7, pick(INN_CHORE_DONE.stable_groom ?? ['Horses groomed.'])) },
 ];
 
 export default function StableView(): JSX.Element {

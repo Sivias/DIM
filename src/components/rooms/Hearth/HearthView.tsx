@@ -29,6 +29,9 @@ export default function HearthView(): JSX.Element {
     startParty(ids, q);
     setSelectedHeroIds([]);
     setSelectedQuest(null);
+    // Navigate to the newly created party
+    const newParty = state.parties[state.parties.length - 1];
+    if (newParty) navigateTo('adventure', newParty.id);
   };
 
   const statusBadge = (status: string) => (

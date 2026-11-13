@@ -27,9 +27,9 @@ export default function BarView(): JSX.Element {
   };
 
   const barTasks = () => [
-    { key: 'bar_clean', icon: '🧹', name: 'Scrub the Bar',   desc: 'Polish the counter until it gleams.',        bonus: '+5g', action: () => doChore('bar_clean', 1, 5, pick(INN_CHORE_DONE.bar_clean ?? ['The bar is cleaned.'])) },
-    { key: 'bar_keg',   icon: '🛢️', name: 'Tap a Fresh Keg', desc: 'A new barrel means fresh business.',         bonus: '+5g', action: () => doChore('bar_keg',   1, 5, pick(INN_CHORE_DONE.bar_keg   ?? ['A fresh keg is tapped.'])) },
-    { key: 'bar_sweep', icon: '🧺', name: 'Sweep the Floor', desc: 'Clear the debris and suspicious stains.',    bonus: '+5g', action: () => doChore('bar_sweep', 1, 5, pick(INN_CHORE_DONE.bar_sweep ?? ['The floor is swept.'])) },
+    { key: 'bar_clean', icon: '🧹', name: 'Scrub the Bar',   desc: 'Polish the counter until it gleams.',        bonus: '+5g', verb: 'Scrub',  action: () => doChore('bar_clean', 1, 5, pick(INN_CHORE_DONE.bar_clean ?? ['The bar is cleaned.'])) },
+    { key: 'bar_keg',   icon: '🛢️', name: 'Tap a Fresh Keg', desc: 'A new barrel means fresh business.',         bonus: '+5g', verb: 'Tap',    action: () => doChore('bar_keg',   1, 5, pick(INN_CHORE_DONE.bar_keg   ?? ['A fresh keg is tapped.'])) },
+    { key: 'bar_sweep', icon: '🧺', name: 'Sweep the Floor', desc: 'Clear the debris and suspicious stains.',    bonus: '+5g', verb: 'Sweep',  action: () => doChore('bar_sweep', 1, 5, pick(INN_CHORE_DONE.bar_sweep ?? ['The floor is swept.'])) },
   ];
 
   const tryUpgrade = () => {
